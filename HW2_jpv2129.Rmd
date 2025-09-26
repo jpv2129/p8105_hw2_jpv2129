@@ -5,3 +5,48 @@ date: "2025-09-26"
 output: github_document
 ---
 
+```{r}
+library(tidyverse) #installing necessary libraries
+library(readr)
+```
+
+## Problem 1
+
+Installing and cleaning pols data.
+```{r}
+pols_df = read_csv("data/pols-month.csv") |> #Clean pols.csv data
+  janitor::clean_names() |> 
+  separate(mon, into = c("year", "month", "day"), sep = "-", convert = TRUE) |> 
+  mutate(
+    month = month.name[as.numeric(month)],
+    president = case_when(
+      prez_gop == 1 ~ "gop",
+      prez_dem == 1 ~ "dem",
+      TRUE ~ NA_character_
+    )
+  ) |> 
+  select(-prez_dem, -prez_gop, -day) |> 
+  arrange(year, month)
+
+pols_df
+```
+
+Installing and cleaning snp data.
+```{r}
+snp_df = read_csv("data/snp.csv") |>  # Clean snp.csv data
+  janitor::clean_names() |>
+  mutate(
+    date = as.Date(date, format = "%m/%d/%y"),
+    year = as.integer(ifelse(
+      format(date, "%y") <= "68", 
+      paste0("20", format(date, "%y")),
+      paste0("19", format(date, "%y"))
+    )),
+    month = month.name[as.integer(format(date, "%m"))]
+  ) |>
+  select(year, month, close) |>
+  arrange(year, month)
+```
+
+
+
