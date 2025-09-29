@@ -8,11 +8,13 @@ output: github_document
 ```{r}
 library(tidyverse) #installing necessary libraries
 library(readr)
+library(readxl)
 ```
 
 ## Problem 1
 
 Installing and cleaning pols data.
+
 ```{r}
 pols_df = read_csv("data/pols-month.csv") |> #Clean pols.csv data
   janitor::clean_names() |> 
@@ -32,6 +34,7 @@ pols_df
 ```
 
 Installing and cleaning snp data.
+
 ```{r}
 snp_df = read_csv("data/snp.csv") |>  # Clean snp.csv data
   janitor::clean_names() |>
@@ -51,6 +54,7 @@ snp_df
 ```
 
 Preparing datasets for merge.
+
 ```{r}
 unemployment_df = read_csv("data/unemployment.csv") |> 
   janitor::clean_names() |> 
@@ -65,7 +69,9 @@ unemployment_df = read_csv("data/unemployment.csv") |>
   rename(year = year) |> 
   arrange(year, month)
 ```
+
 Merging the data sets
+
 ```{r}
 merged_data = pols_df |> #merging pols and snp to prepare for merge into unemployment
   left_join(snp_df, by = c("year", "month"))
@@ -76,7 +82,58 @@ final_data = merged_data |>  # Step 2: Merge unemployment into the result
 final_data
 ```
 
+Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables):
 
+## Problem 2
 
+Importing and cleaning the Mr. Trash Wheel Data
 
+```{r}
+# Mr. Trash Wheel
+mr_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
+  sheet = "Mr. Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  # Skip the first row (metadata/header),
+  janitor:: clean_names() |>  # Clean column names and remove rows that don't have dumpster data (NA in dumpster column)
+  filter(!is.na(dumpster))|>
+  mutate(sports_balls = as.integer(round(sports_balls))) |> 
+  select(dumpster:homes_powered)   # Select only the relevant columns with dumpster-specific data
+mr_trash_wheel
 
+# Professor Trash Wheel - same process with consistent data types
+professor_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
+  sheet = "Professor Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  
+  janitor::clean_names() |>  
+  filter(!is.na(dumpster))|>
+  # Ensure consistent data types
+  mutate(
+    year = as.character(year)  # Convert to character to match Mr. Trash Wheel
+  ) |>
+  select(dumpster:homes_powered)
+
+# Gwynnda Trash Wheel - same process with consistent data types
+gwynnda_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
+  sheet = "Gwynnda Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  
+  janitor::clean_names() |>  
+  filter(!is.na(dumpster))|>
+  # Ensure consistent data types
+  mutate(
+    year = as.character(year)  # Convert to character to match Mr. Trash Wheel
+  ) |>
+  select(dumpster:homes_powered)
+
+# Add identifier variable to each dataset
+mr_trash_wheel = mr_trash_wheel |> 
+  mutate(trash_wheel = "Mr. Trash Wheel")
+
+professor_trash_wheel = professor_trash_wheel |> 
+  mutate(trash_wheel = "Professor Trash Wheel")
+
+gwynnda_trash_wheel = gwynnda_trash_wheel |> 
+  mutate(trash_wheel = "Gwynnda Trash Wheel")
+
+# Combine all three into one tidy dataset
+all_trash_wheels = bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda_trash_wheel) |> 
+  select(trash_wheel, everything())  # Move identifier to first column
+
+# View the combined tidy dataset
+all_trash_wheels
+```
