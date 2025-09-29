@@ -130,10 +130,12 @@ professor_trash_wheel = professor_trash_wheel |>
 gwynnda_trash_wheel = gwynnda_trash_wheel |> 
   mutate(trash_wheel = "Gwynnda Trash Wheel")
 
-# Combine all three into one tidy dataset
-all_trash_wheels = bind_rows(mr_trash_wheel, professor_trash_wheel, gwynnda_trash_wheel) |> 
+all_trash_wheels = mr_trash_wheel |> 
+  full_join(professor_trash_wheel) |> 
+  full_join(gwynnda_trash_wheel) |> 
   select(trash_wheel, everything())  # Move identifier to first column
 
 # View the combined tidy dataset
 all_trash_wheels
+
 ```
