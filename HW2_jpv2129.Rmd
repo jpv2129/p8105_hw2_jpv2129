@@ -173,7 +173,7 @@ zipcodes_df = read_csv("data/zillowdata/zipcodes.csv", na = c("NA", ".", "")) |>
   janitor::clean_names() |> 
   select(
     -file_date,
-    -county  # Remove county from zipcodes_df to avoid duplication
+    -county
   )
 
 zori_df = read_csv("data/zillowdata/zipzori.csv", na = c("NA", ".", "")) |>  
@@ -230,6 +230,18 @@ view(tidy_df)
 nrow(tidy_df)
 dim(tidy_df)
 
+# Check unique ZIP codes and neighborhoods
+cat("Number of unique ZIP codes:", n_distinct(tidy_df$zip_code), "\n")
+cat("Number of unique neighborhoods:", n_distinct(tidy_df$neighborhood), "\n")
+
+# Find ZIP codes in zipcodes_df but not in zori_df
+missing_zips <- zipcodes_df %>%
+  anti_join(zori_df, by = "zip_code") %>%
+  select(zip_code) %>%
+  distinct()
+
+cat("Number of ZIP codes in ZIP code dataset but not in Zillow dataset:", nrow(missing_zips), "\n")
+
 #Creating table to find 10 biggest price drops with county and neighborhood
 top_drops <- tidy_df %>%
   mutate(borough = case_when(
@@ -254,8 +266,9 @@ top_drops <- tidy_df %>%
 
 kable(top_drops)
 ```
-
-
+Total observations: 17516
+Unique neighborhoods: 43
+Unique zip codes: 149
 
 
 
