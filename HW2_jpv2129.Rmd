@@ -5,7 +5,7 @@ date: "2025-09-26"
 output: github_document
 ---
 
-```{r}
+```{r setup, echo=FALSE, message=FALSE}
 library(tidyverse) #installing necessary libraries
 library(readr)
 library(readxl)
