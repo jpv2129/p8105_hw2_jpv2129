@@ -230,7 +230,7 @@ view(tidy_df)
 nrow(tidy_df)
 dim(tidy_df)
 
-# Clean analysis with beautiful table
+#Creating table to find 10 biggest price drops with county and neighborhood
 top_drops <- tidy_df %>%
   mutate(borough = case_when(
     str_detect(county, "New York") ~ "Manhattan",
@@ -238,7 +238,7 @@ top_drops <- tidy_df %>%
     str_detect(county, "Queens") ~ "Queens",
     str_detect(county, "Bronx") ~ "Bronx", 
     str_detect(county, "Richmond") ~ "Staten Island",
-    TRUE ~ county
+    TRUE ~ "Other NYC Area"
   )) %>%
   filter(date %in% c("01/31/20", "01/31/21")) %>%
   group_by(zip_code) %>% filter(n() == 2) %>%
@@ -249,10 +249,9 @@ top_drops <- tidy_df %>%
   ) %>%
   ungroup() %>% drop_na() %>%
   slice_min(price_drop, n = 10) %>%
-  select(zip_code, borough, county, jan_2020 = `01/31/20`, jan_2021 = `01/31/21`, price_drop, percent_drop) %>%
+  select(zip_code, borough, neighborhood, jan_2020 = `01/31/20`, jan_2021 = `01/31/21`, price_drop, percent_drop) %>%
   mutate(across(where(is.numeric), round, 2))
 
-# Create a beautiful table
 kable(top_drops)
 ```
 
