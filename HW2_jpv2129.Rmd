@@ -9,6 +9,7 @@ output: github_document
 library(tidyverse) #installing necessary libraries
 library(readr)
 library(readxl)
+library(lubridate)
 ```
 
 ## Problem 1
@@ -168,10 +169,35 @@ What was the total number of cigarette butts collected by Gwynnda in June of 202
 ## Problem 3
 ```{r}
 zipcodes_df = read_csv("data/zillowdata/zipcodes.csv", na = c("NA", ".", "")) |>  
-  janitor::clean_names() 
+  janitor::clean_names() |> 
+  select(
+    -file_date,
+    -county  # Remove county from zipcodes_df to avoid duplication
+  )
 
 zori_df = read_csv("data/zillowdata/zipzori.csv", na = c("NA", ".", "")) |>  
-  janitor::clean_names() 
+  janitor::clean_names() |> 
+  pivot_longer(
+    cols = starts_with("x20"),
+    names_to = "date",
+    values_to = "zillow_value"
+  ) |> 
+  mutate(
+    date = format(ymd(gsub("x", "", date)), "%m/%d/%y")
+  ) |> 
+  select(
+    zip_code = region_name,
+    county = county_name,
+    date,
+    zillow_value,
+    -region_id, -size_rank, -region_type, -state_name
+  )
+
+tidy_df <- zori_df |> 
+  left_join(zipcodes_df, by = "zip_code")
+
+nrow(tidy_df)
+dim(tidy_df)
 
 ```
 
