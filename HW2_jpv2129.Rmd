@@ -82,7 +82,8 @@ final_data = merged_data |>  # Step 2: Merge unemployment into the result
 final_data
 ```
 
-Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables):
+Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset 
+(e.g. give the dimension, range of years, and names of key variables):
 
 ## Problem 2
 
@@ -90,7 +91,7 @@ Importing and cleaning the Mr. Trash Wheel Data
 
 ```{r}
 # Mr. Trash Wheel
-mr_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
+mr_trash_wheel = read_excel("data/trashwheeldatanew.xlsx", 
   sheet = "Mr. Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  # Skip the first row (metadata/header),
   janitor:: clean_names() |>  # Clean column names and remove rows that don't have dumpster data (NA in dumpster column)
   filter(!is.na(dumpster))|>
@@ -99,7 +100,7 @@ mr_trash_wheel = read_excel("data/trashwheeldata.xlsx",
 mr_trash_wheel
 
 # Professor Trash Wheel - same process with consistent data types
-professor_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
+professor_trash_wheel = read_excel("data/trashwheeldatanew.xlsx", 
   sheet = "Professor Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  
   janitor::clean_names() |>  
   filter(!is.na(dumpster))|>
@@ -110,8 +111,8 @@ professor_trash_wheel = read_excel("data/trashwheeldata.xlsx",
   select(dumpster:homes_powered)
 
 # Gwynnda Trash Wheel - same process with consistent data types
-gwynnda_trash_wheel = read_excel("data/trashwheeldata.xlsx", 
-  sheet = "Gwynnda Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  
+gwynns_trash_wheel = read_excel("data/trashwheeldatanew.xlsx", 
+  sheet = "Gwynns Falls Trash Wheel", skip = 1, na = c("NA", ".", "")) %>%  
   janitor::clean_names() |>  
   filter(!is.na(dumpster))|>
   # Ensure consistent data types
@@ -127,15 +128,44 @@ mr_trash_wheel = mr_trash_wheel |>
 professor_trash_wheel = professor_trash_wheel |> 
   mutate(trash_wheel = "Professor Trash Wheel")
 
-gwynnda_trash_wheel = gwynnda_trash_wheel |> 
-  mutate(trash_wheel = "Gwynnda Trash Wheel")
+gwynns_trash_wheel = gwynns_trash_wheel |> 
+  mutate(trash_wheel = "Gwynns Falls Trash Wheel")
 
 all_trash_wheels = mr_trash_wheel |> 
   full_join(professor_trash_wheel) |> 
-  full_join(gwynnda_trash_wheel) |> 
+  full_join(gwynns_trash_wheel) |> 
   select(trash_wheel, everything())  # Move identifier to first column
 
 # View the combined tidy dataset
 all_trash_wheels
+view(all_trash_wheels)
 
+#Calculations requested for trash tons total and cigarette butts for June 2022
+professor_total_weight <- all_trash_wheels |> 
+  filter(trash_wheel == "Professor Trash Wheel") |> 
+  summarise(total_weight_tons = sum(weight_tons, na.rm = TRUE))
+
+gwynns_june_2022_butts <- all_trash_wheels |> 
+  filter(trash_wheel == "Gwynns Falls Trash Wheel",
+         year == "2022",
+         month == "June") |> 
+  summarise(total_cigarette_butts = sum(cigarette_butts, na.rm = TRUE))
+
+# Display results
+cat("Total weight of trash collected by Professor Trash Wheel:\n")
+print(professor_total_weight)
+
+cat("\nTotal number of cigarette butts collected by Gwynns in June 2022:\n")
+print(gwynns_june_2022_butts)
 ```
+
+Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. 
+For available data, what was the total weight of trash collected by Professor Trash Wheel? 
+  282 tons.
+What was the total number of cigarette butts collected by Gwynnda in June of 2022?
+  18,120 cigarette butts.
+
+
+
+
+
