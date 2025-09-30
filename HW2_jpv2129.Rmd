@@ -165,6 +165,53 @@ For available data, what was the total weight of trash collected by Professor Tr
 What was the total number of cigarette butts collected by Gwynnda in June of 2022?
   18,120 cigarette butts.
 
+## Problem 3
+```{r}
+# Load required libraries
+library(dplyr)
+library(tidyr)
+library(readr)
+
+# Read the dataset
+zipcodes <- read_csv("data/zillowdata/ZipCodes.csv")
+
+
+# Data cleaning and transformation
+cleaned_zipcodes <- zipcodes %>%
+  # Convert all character columns to proper case for consistency
+  mutate(across(where(is.character), ~ stringr::str_to_title(.))) %>%
+  # Handle missing values in Neighborhood - replace "Na" with proper NA
+  mutate(Neighborhood = ifelse(Neighborhood == "Na", NA, Neighborhood)) %>%
+  # Convert File Date to proper Date format
+  mutate(`File Date` = as.Date(`File Date`, format = "%m/%d/%y")) %>%
+  # Ensure ZipCode is character (to preserve leading zeros if any)
+  mutate(ZipCode = as.character(ZipCode)) %>%
+  # Create a proper County name column (currently "County" has borough names)
+  rename(Borough = County) %>%
+  # Create proper FIPS code by combining State and County FIPS
+  mutate(FIPS_Code = paste(`State FIPS`, `County FIPS`, sep = "")) %>%
+  # Reorder columns logically
+  select(
+    Borough, 
+    ZipCode, 
+    Neighborhood,
+    FIPS_Code,
+    `State FIPS`, 
+    `County Code`, 
+    `County FIPS`,
+    `File Date`
+  ) %>%
+  # Sort by Borough and ZipCode for better organization
+  arrange(Borough, ZipCode)
+
+
+# Final organized dataset
+final_zipcodes <- cleaned_zipcodes %>%
+  # Final arrangement for meaningful order
+  arrange(Borough, Neighborhood, ZipCode)
+```
+
+
 
 
 
