@@ -10,6 +10,7 @@ library(tidyverse) #installing necessary libraries
 library(readr)
 library(readxl)
 library(lubridate)
+library(knitr)
 ```
 
 ## Problem 1
@@ -194,13 +195,65 @@ zori_df = read_csv("data/zillowdata/zipzori.csv", na = c("NA", ".", "")) |>
   )
 
 tidy_df <- zori_df |> 
-  left_join(zipcodes_df, by = "zip_code")
+  left_join(zipcodes_df, by = "zip_code") 
 
+tidy_df <- tidy_df |> 
+  mutate(
+    borough = case_when(
+      county == "New York County" ~ "Manhattan",
+      county == "Kings County" ~ "Brooklyn", 
+      county == "Queens County" ~ "Queens",
+      county == "Bronx County" ~ "Bronx",
+      county == "Richmond County" ~ "Staten Island",
+      # Handle variations in county naming
+      str_detect(tolower(county), "new york") ~ "Manhattan",
+      str_detect(tolower(county), "kings") ~ "Brooklyn",
+      str_detect(tolower(county), "queens") ~ "Queens", 
+      str_detect(tolower(county), "bronx") ~ "Bronx",
+      str_detect(tolower(county), "richmond") ~ "Staten Island",
+      TRUE ~ "Other"  # For non-NYC counties
+    )
+  )
+# First, create the borough column from county
+tidy_df <- tidy_df %>%
+  mutate(
+    borough = case_when(
+      str_detect(county, "New York") ~ "Manhattan",
+      str_detect(county, "Kings") ~ "Brooklyn",
+      str_detect(county, "Queens") ~ "Queens",
+      str_detect(county, "Bronx") ~ "Bronx",
+      str_detect(county, "Richmond") ~ "Staten Island",
+      TRUE ~ "Other NYC Area"
+    )
+  )
+view(tidy_df)
 nrow(tidy_df)
 dim(tidy_df)
 
-```
+# Clean analysis with beautiful table
+top_drops <- tidy_df %>%
+  mutate(borough = case_when(
+    str_detect(county, "New York") ~ "Manhattan",
+    str_detect(county, "Kings") ~ "Brooklyn",
+    str_detect(county, "Queens") ~ "Queens",
+    str_detect(county, "Bronx") ~ "Bronx", 
+    str_detect(county, "Richmond") ~ "Staten Island",
+    TRUE ~ county
+  )) %>%
+  filter(date %in% c("01/31/20", "01/31/21")) %>%
+  group_by(zip_code) %>% filter(n() == 2) %>%
+  pivot_wider(names_from = date, values_from = zillow_value) %>%
+  mutate(
+    price_drop = `01/31/21` - `01/31/20`,
+    percent_drop = ((`01/31/21` - `01/31/20`) / `01/31/20`) * 100
+  ) %>%
+  ungroup() %>% drop_na() %>%
+  slice_min(price_drop, n = 10) %>%
+  select(zip_code, borough, county, jan_2020 = `01/31/20`, jan_2021 = `01/31/21`, price_drop, percent_drop) %>%
+  mutate(across(where(is.numeric), round, 2))
 
+# Create a beautiful table
+kable(top_drops)
 ```
 
 
