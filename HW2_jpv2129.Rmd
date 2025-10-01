@@ -176,6 +176,8 @@ zipcodes_df = read_csv("data/zillowdata/zipcodes.csv", na = c("NA", ".", "")) |>
     -county
   )
 
+view(zipcodes_df)
+
 zori_df = read_csv("data/zillowdata/zipzori.csv", na = c("NA", ".", "")) |>  
   janitor::clean_names() |> 
   pivot_longer(
@@ -196,8 +198,10 @@ zori_df = read_csv("data/zillowdata/zipzori.csv", na = c("NA", ".", "")) |>
 
 tidy_df <- zori_df |> 
   left_join(zipcodes_df, by = "zip_code") 
+```
 
-tidy_df <- tidy_df |> 
+```{r}
+tidy_df <- tidy_df |> #Adding borough variable to tidy_df
   mutate(
     borough = case_when(
       county == "New York County" ~ "Manhattan",
@@ -214,8 +218,7 @@ tidy_df <- tidy_df |>
       TRUE ~ "Other"  # For non-NYC counties
     )
   )
-# First, create the borough column from county
-tidy_df <- tidy_df %>%
+tidy_df <- tidy_df |>  # Create the borough column from county
   mutate(
     borough = case_when(
       str_detect(county, "New York") ~ "Manhattan",
@@ -227,9 +230,12 @@ tidy_df <- tidy_df %>%
     )
   )
 view(tidy_df)
-nrow(tidy_df)
+nrow(tidy_df) #Finding number of observations
 dim(tidy_df)
+```
+Description of tidy_df: There are a total of 17, 516 observations. There are 43 unique neighborhoods. There are 149 unique zip codes. 149
 
+```{r}
 # Check unique ZIP codes and neighborhoods
 cat("Number of unique ZIP codes:", n_distinct(tidy_df$zip_code), "\n")
 cat("Number of unique neighborhoods:", n_distinct(tidy_df$neighborhood), "\n")
@@ -241,7 +247,9 @@ missing_zips <- zipcodes_df %>%
   distinct()
 
 cat("Number of ZIP codes in ZIP code dataset but not in Zillow dataset:", nrow(missing_zips), "\n")
-
+```
+There are 171 ZIP codes from the ZIP code dataset that do not appear in the Zillow dataset. This is possibly because of:
+```{r}
 #Creating table to find 10 biggest price drops with county and neighborhood
 top_drops <- tidy_df %>%
   mutate(borough = case_when(
@@ -263,12 +271,15 @@ top_drops <- tidy_df %>%
   slice_min(price_drop, n = 10) %>%
   select(zip_code, borough, neighborhood, jan_2020 = `01/31/20`, jan_2021 = `01/31/21`, price_drop, percent_drop) %>%
   mutate(across(where(is.numeric), round, 2))
-
 kable(top_drops)
 ```
-Total observations: 17516
-Unique neighborhoods: 43
-Unique zip codes: 149
+The ten neighborhoods with the  largest drop in price from January 2020 to 2021 are:
+
+
+
+
+
+
 
 
 
