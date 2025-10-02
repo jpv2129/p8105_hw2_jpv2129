@@ -241,7 +241,7 @@ view(tidy_df)
 nrow(tidy_df) #Finding number of observations
 dim(tidy_df)
 ```
-Description of tidy_df: There are a total of 17, 516 observations. There are 43 unique neighborhoods. There are 149 unique zip codes. 
+Description of tidy_df: There are a total of 17, 516 observations and 9 variables. There are 43 unique neighborhoods. There are 149 unique zip codes. Tidy_df is a combination of the zip codes dataset and the ZORI dataset, which includes data for the Zillow Observed Rent Index
 
 ```{r}
 # Check unique ZIP codes and neighborhoods
@@ -281,7 +281,7 @@ top_drops <- tidy_df %>%
   mutate(across(where(is.numeric), round, 2))
 kable(top_drops)
 ```
-The ten zip codes with the largest drop in price from January 2020 to 2021 are all in Manhattan and they include the neighborhoods of: Lower Manhattan, Lower East Side, Gramercy Park/Murray Hill, Chelsea/Clinton, and Greenwich Village/Soho. These zipcodes include 10007, 10009, 10016, 10001, 10002, 10004, 10038, 10012, 10010, and 10003.10007 provided the biggest price drop of $-912.60.
+The ten zip codes with the largest drop in price from January 2020 to 2021 are all in Manhattan and they include the neighborhoods of: Lower Manhattan, Lower East Side, Gramercy Park/Murray Hill, Chelsea/Clinton, and Greenwich Village/Soho. These zipcodes include 10007, 10009, 10016, 10001, 10002, 10004, 10038, 10012, 10010, and 10003.The zip code of 10007 provided the biggest price drop of $-912.60, this neighborhood is Lower Manhattan in Manhattan.
 
 
 
